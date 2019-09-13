@@ -19,15 +19,18 @@ def webhook():
     req = request.get_json()
     print(f'request: {req}')
 
+    text = str(req['text']).lower()
+    print(f'text: {text}')
+
     # every command is . prefixed ignore the rest
-    if req['text'][0] != '.':
+    if text[0] != '.':
         return "ok", 200
     # dont respond to bot messages
     if bot.sender_is_bot(req):
         return "ok", 200
 
     # split the message request by space
-    command_lst = req['text'].lower().split[' ']
+    command_lst = text.split(' ')
     print(f'list: {command_lst}')
     # remove period
     command = command_lst[0][1:]
