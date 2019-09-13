@@ -55,6 +55,8 @@ def webhook():
         bot.reply(roll_dice(command_lst))
     if command == 'matchups':
         bot.reply(league_matchups(command_lst))
+    if command == 'scores':
+        bot.reply(league_scoreboard(command_lst))
 
     return "ok", 200
 
@@ -99,8 +101,30 @@ def league_matchups(command_lst):
 
     return message
 
+def league_scoreboard(command_lst):
+    if not league:
+        return
+    # try and get week # from second arg
+    try:
+        week = int(command_lst[1])
+        week_str = f'Week {week}'
+    except:
+        week = 0
+        week_str = 'This Week'
+    box_scores = league.box_scores(week)
+    scores = [f'Scores for {week_str}:\n']
+    for score in box_scores:
+        format_str = f'{score.home_team.team_abbrev} {score.home_score} - {score.away_score} {score.away_team.team_abbrev}\n'
+        scores.append(format_str)
+    message = ''
+    for strings in scores:
+        message += strings
+    return message
+    
+
 if __name__ == '__main__':
     print('Testing')
     msg = roll_dice(['roll', '2d6+5'])
     print(msg)
     print(league_matchups(['matchups']))
+    print(league_scoreboard(['scoreboard', 'butt']))
