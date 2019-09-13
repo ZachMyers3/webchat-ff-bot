@@ -3,6 +3,7 @@ import json
 import dice
 from flask import Flask, request
 from groupme import GroupmeBot
+import datetime
 
 from ff_espn_api import League
 
@@ -17,6 +18,10 @@ try:
     league_id = os.environ["ESPN_LEAGUE_ID"]
 except KeyError:
     league_id = None
+if league_id:
+    league = League(league_id, int(datetime.datetime.now().strftime('%Y')))
+else:
+    league = None
 
 bot = GroupmeBot(bot_id)
 
@@ -48,8 +53,8 @@ def webhook():
         bot.reply('go fuck yourself')
     if command == 'roll':
         bot.reply(roll_dice(command_lst))
-    if command == 'scoreboard':
-        bot.reply(league_scoreboard(command_lst))
+    if command == 'matchups':
+        bot.reply(league_matchups(command_lst))
 
     return "ok", 200
 
@@ -74,10 +79,28 @@ def roll_dice(command_lst):
 
     return message
 
-def league_scoreboard(command_lst):
-    
+def league_matchups(command_lst):
+    if not league:
+        print('No league defined exiting')
+        return
+    scoreboard = league.scoreboard()
+    scores = ['Matchups for this week:\n']
+    for matchup in scoreboard:
+        test_str = len(f'{matchup.home_team.team_name} ({matchup.home_team.wins}-{matchup.home_team.losses})')
+        if test_str > 30:
+            tabs = '\t'
+        else:
+            tabs = '\t\t'
+        format_str = f'{matchup.home_team.team_name} ({matchup.home_team.wins}-{matchup.home_team.losses}){tabs}vs\t{matchup.away_team.team_name} ({matchup.away_team.wins}-{matchup.away_team.losses})\n'
+        scores.append(format_str)
+    message = ''
+    for msg_str in scores:
+        message += msg_str
+
+    return message
 
 if __name__ == '__main__':
     print('Testing')
     msg = roll_dice(['roll', '2d6+5'])
     print(msg)
+    print(league_matchups(['matchups']))
