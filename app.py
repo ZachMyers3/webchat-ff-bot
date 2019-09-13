@@ -59,6 +59,8 @@ def webhook():
         bot.reply(league_scoreboard(command_lst))
     if command == 'proj':
         bot.reply(league_projections(command_lst))
+    if command == 'ranks':
+        bot.reply(get_power_rankings(command_lst))
 
     return "ok", 200
 
