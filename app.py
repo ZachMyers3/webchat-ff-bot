@@ -16,9 +16,20 @@ bot = GroupmeBot(bot_id)
 @app.route('/', methods=['POST'])
 def webhook():
     # 'message' is an object that represents a single GroupMe message.
-    message = request.get_json()
-    print(f'message: {message}')
+    req = request.get_json()
 
-    # TODO: Your bot's logic here
+    # every command is . prefixed ignore the rest
+    if req.text[0] != '.':
+        return "ok", 200
+    # dont respond to bot messages
+    if bot.sender_is_bot(req):
+        return "ok", 200
+
+    # split the message request by space
+    command_lst = req.text.lower().split[' ']
+    # remove period
+    command = command_lst[0][1:]
+    if command == 'help':
+        bot.reply('go fuck yourself')
 
     return "ok", 200
