@@ -28,8 +28,10 @@ def webhook():
 
     # split the message request by space
     command_lst = req['text'].lower().split[' ']
+    print(f'list: {command_lst}')
     # remove period
     command = command_lst[0][1:]
+    print(f'command: {command}')
     if command == 'help':
         bot.reply('go fuck yourself')
 
