@@ -4,11 +4,19 @@ import dice
 from flask import Flask, request
 from groupme import GroupmeBot
 
+from ff_espn_api import League
+
 app = Flask(__name__)
+# groupme bot id
 try:
     bot_id = os.environ["GROUPME_BOT_ID"]
 except KeyError:
     print('GROUPME_BOT_ID environment variable not set, please set variable and re-run')
+# espn ff league id
+try:
+    league_id = os.environ["ESPN_LEAGUE_ID"]
+except KeyError:
+    league_id = None
 
 bot = GroupmeBot(bot_id)
 
@@ -40,6 +48,8 @@ def webhook():
         bot.reply('go fuck yourself')
     if command == 'roll':
         bot.reply(roll_dice(command_lst))
+    if command == 'scoreboard':
+        bot.reply(league_scoreboard(command_lst))
 
     return "ok", 200
 
@@ -63,6 +73,9 @@ def roll_dice(command_lst):
         )
 
     return message
+
+def league_scoreboard(command_lst):
+    
 
 if __name__ == '__main__':
     print('Testing')
