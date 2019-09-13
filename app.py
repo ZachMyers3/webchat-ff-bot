@@ -89,13 +89,15 @@ def league_matchups(command_lst):
         return
     scoreboard = league.scoreboard()
     scores = ['Matchups for this week:\n']
+    max_size = 0
     for matchup in scoreboard:
-        test_str = len(f'{matchup.home_team.team_name} ({matchup.home_team.wins}-{matchup.home_team.losses})')
-        if test_str > 30:
-            tabs = '\t'
-        else:
-            tabs = '\t\t'
-        format_str = f'{matchup.home_team.team_name} ({matchup.home_team.wins}-{matchup.home_team.losses}){tabs}vs\t{matchup.away_team.team_name} ({matchup.away_team.wins}-{matchup.away_team.losses})\n'
+        home_len = len(f'{matchup.home_team.team_name} ({matchup.home_team.wins}-{matchup.home_team.wins})')
+        if home_len > max_size:
+            max_size = home_len
+    for matchup in scoreboard:
+        home = f'{matchup.home_team.team_name} ({matchup.home_team.wins}-{matchup.home_team.wins})'.ljust(max_size)
+        away = f'{matchup.away_team.team_name} ({matchup.away_team.wins}-{matchup.away_team.losses})'
+        format_str = f'{home} vs {away}\n'
         scores.append(format_str)
     message = ''
     for msg_str in scores:
@@ -115,8 +117,15 @@ def league_scoreboard(command_lst):
         week_str = 'This Week'
     box_scores = league.box_scores(week)
     scores = [f'Scores for {week_str}:\n']
+    max_size = 0
     for score in box_scores:
-        format_str = f'{score.home_team.team_abbrev} {score.home_score:.2f}\t-\t{score.away_score:.2f} {score.away_team.team_abbrev}\n'
+        home_len = len(f'{score.home_team.team_abbrev} {score.home_score:.2f}')
+        if home_len > max_size:
+            max_size = home_len
+    for score in box_scores:
+        home = f'{score.home_team.team_abbrev} {score.home_score:.2f}'.ljust(max_size)
+        away = f'{score.away_score:.2f} {score.away_team.team_abbrev}'
+        format_str = f'{home} - {away}\n'
         scores.append(format_str)
     message = ''
     for strings in scores:
@@ -135,10 +144,18 @@ def league_projections(command_lst):
         week_str = 'This Week'
     box_scores = league.box_scores(week)
     scores = [f'Projected Scores for {week_str}:\n']
+    max_size = 0
+    for score in box_scores:
+        home_proj = get_projected_points(score.home_lineup)
+        home_size = len(f'{score.home_team.team_abbrev} {home_proj:.2f}')
+        if home_size > max_size:
+            max_size = home_size
     for score in box_scores:
         home_proj = get_projected_points(score.home_lineup)
         away_proj = get_projected_points(score.away_lineup)
-        format_str = f'{score.home_team.team_abbrev} {home_proj:.2f}\t-\t{away_proj:.2f} {score.away_team.team_abbrev}\n'
+        home = f'{score.home_team.team_abbrev} {home_proj:.2f}'.ljust(max_size)
+        away = f'{away_proj:.2f} {score.away_team.team_abbrev}'
+        format_str = f'{home} - {away}\n'
         scores.append(format_str)
     message = ''
     for strings in scores:
@@ -156,7 +173,28 @@ def get_projected_points(lineup):
             total_proj += player.projected_points
 
     return total_proj
-    
+
+def get_power_rankings(command_lst):
+    if not league:
+        return
+    try:
+        week = int(command_lst[1])
+        week_str = f'Week {week}'
+    except:
+        week = 0
+        week_str = 'This Week'
+    rank_list = [f'Power Rankings for {week_str}:\n']
+    ranks = league.power_rankings(week=week)
+    for rank in ranks:
+        rank_no = f'{float(rank[0]):.2f}'.ljust(5)
+        rank_str = f'{rank_no} - {rank[1].team_name}\n'
+        rank_list.append(rank_str)
+    message = ''
+    for rank_str in rank_list:
+        message += rank_str
+
+    return message
+
 
 if __name__ == '__main__':
     print('Testing')
@@ -164,4 +202,5 @@ if __name__ == '__main__':
     print(msg)
     print(league_matchups(['matchups']))
     print(league_scoreboard(['scoreboard', 'butt']))
-    print(league_projections(['proj', '1']))
+    print(league_projections(['proj']))
+    print(get_power_rankings(['ranks']))
