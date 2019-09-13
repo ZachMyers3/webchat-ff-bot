@@ -57,6 +57,8 @@ def webhook():
         bot.reply(league_matchups(command_lst))
     if command == 'scores':
         bot.reply(league_scoreboard(command_lst))
+    if command == 'proj':
+        bot.reply(league_projections(command_lst))
 
     return "ok", 200
 
@@ -114,12 +116,46 @@ def league_scoreboard(command_lst):
     box_scores = league.box_scores(week)
     scores = [f'Scores for {week_str}:\n']
     for score in box_scores:
-        format_str = f'{score.home_team.team_abbrev} {score.home_score} - {score.away_score} {score.away_team.team_abbrev}\n'
+        format_str = f'{score.home_team.team_abbrev} {score.home_score:.2f}\t-\t{score.away_score:.2f} {score.away_team.team_abbrev}\n'
         scores.append(format_str)
     message = ''
     for strings in scores:
         message += strings
     return message
+
+def league_projections(command_lst):
+    if not league:
+        return
+    # try and get week # from second arg
+    try:
+        week = int(command_lst[1])
+        week_str = f'Week {week}'
+    except:
+        week = 0
+        week_str = 'This Week'
+    box_scores = league.box_scores(week)
+    scores = [f'Scores for {week_str}:\n']
+    for score in box_scores:
+        home_proj = get_projected_points(score.home_lineup)
+        away_proj = get_projected_points(score.away_lineup)
+        format_str = f'{score.home_team.team_abbrev} {home_proj:.2f}\t-\t{away_proj:.2f} {score.away_team.team_abbrev}\n'
+        scores.append(format_str)
+    message = ''
+    for strings in scores:
+        message += strings
+    return message
+
+def get_projected_points(lineup):
+    total_proj = 0
+    for player in lineup:
+        if player.slot_position == 'BE':
+            continue
+        if player.points != 0:
+            total_proj += player.points
+        else:
+            total_proj += player.projected_points
+
+    return total_proj
     
 
 if __name__ == '__main__':
@@ -128,3 +164,4 @@ if __name__ == '__main__':
     print(msg)
     print(league_matchups(['matchups']))
     print(league_scoreboard(['scoreboard', 'butt']))
+    print(league_projections(['proj', '1']))
