@@ -17,6 +17,7 @@ bot = GroupmeBot(bot_id)
 def webhook():
     # 'message' is an object that represents a single GroupMe message.
     req = request.get_json()
+    print(f'request: {req}')
 
     # every command is . prefixed ignore the rest
     if req.text[0] != '.':
