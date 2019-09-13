@@ -134,7 +134,7 @@ def league_projections(command_lst):
         week = 0
         week_str = 'This Week'
     box_scores = league.box_scores(week)
-    scores = [f'Scores for {week_str}:\n']
+    scores = [f'Projected Scores for {week_str}:\n']
     for score in box_scores:
         home_proj = get_projected_points(score.home_lineup)
         away_proj = get_projected_points(score.away_lineup)
